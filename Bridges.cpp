@@ -1,27 +1,26 @@
 #include<bits/stdc++.h>
 using namespace std;
-void DFS(int* num, int* low,vector<int> edge[], int current_node, int cnt, int &num_bridge, int &num_articulation){
-    num[current_node]=cnt+1;
-    //cout << "\n" << num[current_node] << "\n";
-    low[current_node]=num[current_node];
+int cnt;
+void DFS(int num[], int low[],vector<int> edge[], int current_node, int previous_node, int &num_bridge, int articulation[]){
+    low[current_node]=num[current_node]=++cnt;
     for(int i=0;i<edge[current_node].size();i++){
-        if(num[edge[current_node][i]]==-1){
-            DFS(num, low, edge, edge[current_node][i], cnt+1, num_bridge, num_articulation);
+        if(edge[current_node][i]==previous_node){
+            continue;
         }
-        if(edge[current_node][i]!=current_node){
+        if(num[edge[current_node][i]]==-1){
+            DFS(num, low, edge, edge[current_node][i], current_node, num_bridge, articulation);
+            low[current_node]=min(low[current_node], low[edge[current_node][i]]);
+            if(low[edge[current_node][i]] >= num[current_node]){
+                articulation[current_node] = 1;
+            }
+            if(low[edge[current_node][i]] > num[current_node]){
+                num_bridge = num_bridge + 1;
+            }
+        }
+        else{
             low[current_node]=min(low[current_node], num[edge[current_node][i]]);
         }
-        
-    }
 
-    if(low[current_node] >= num[current_node]){
-        num_bridge = num_articulation + 1;
-    }
-
-    for(int i=0;i<edge[current_node].size();i++){
-       if(low[edge[current_node][i]] > num[current_node]){
-            num_bridge = num_bridge + 1;
-       }
     }
 
 }
@@ -44,26 +43,28 @@ int main(){
     //DFS
     int num[n+1];
     int low[n+1];
-    int num_bridge = 0, num_articulation = 0;
+    int num_bridge = 0, num_articulation = 0, articulation[n+1];
     for(int i=1;i<=n;i++){
         num[i]=-1;
+        articulation[i]=0;
     }
 
     for(int current_node=1;current_node<=n;current_node++){
+        int child=0;
         if(num[current_node]==-1){
-            num[current_node]=1;
-            low[current_node]=1;
+            cnt=0;
+            low[current_node]=num[current_node]=++cnt;
             for(int i=0;i<edge[current_node].size();i++){
                 if(num[edge[current_node][i]]==-1){
-                    DFS(num, low, edge, edge[current_node][i], 1, num_bridge, num_articulation);
-                }
-                if(edge[current_node][i]!=current_node){
-                    low[current_node]=min(low[current_node], num[edge[current_node][i]]);
+                    DFS(num, low, edge, edge[current_node][i], current_node, num_bridge, articulation);
+                    child++;
                 }
             }
-            if(edge[current_node].size()>=2){
-                num_articulation = num_articulation + 1;
+
+            if(child>=2){
+                articulation[current_node] = 1;
             }
+
             for(int i=0;i<edge[current_node].size();i++){
                 if(low[edge[current_node][i]] > num[current_node]){
                     num_bridge = num_bridge + 1;
@@ -73,16 +74,9 @@ int main(){
         }
     }
 
-    for(int current_node=1;current_node<=n;current_node++){
-        cout << num[current_node] << " ";
+    for(int i=1;i<=n;i++){
+        num_articulation = num_articulation + articulation[i];
     }
-
-    cout << "\n";
-    for(int current_node=1;current_node<=n;current_node++){
-        cout << low[current_node] << " ";
-    }
-
-    cout << "\n";
     cout << num_articulation << " " << num_bridge;
 
 

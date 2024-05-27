@@ -1,13 +1,13 @@
 #include<bits/stdc++.h>
 using namespace std;
-vector<int> g[1001];
+vector<int> g[10001];
 int n, m;
-int d[1001];
-int num_in[1001];
-int earliest_time_to_start[1001];
-int time_finish[1001];
+int d[10001];
+int num_in[10001];
+int earliest_time_to_start[10001];
+int time_finish[10001];
 int res;
-int topo[1001];
+int topo[10001];
 void init(){
     cin >> n >> m;
     for(int i=1;i<=n;i++){
@@ -65,7 +65,13 @@ void topo_sort(){
 int main(){
     topo_sort();
     for(int i=1;i<=n;i++){
-        cout << topo[i] << " ";
+        time_finish[topo[i]]=earliest_time_to_start[topo[i]]+d[topo[i]];
+        res=max(res,time_finish[topo[i]]);
+        for(auto x:g[topo[i]]){
+            earliest_time_to_start[x]=max(earliest_time_to_start[x], time_finish[topo[i]]);
+        }
     }
+
+    cout << res;
     return 0;
 }
